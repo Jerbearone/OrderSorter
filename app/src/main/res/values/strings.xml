@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">DE Order Sorter</string>
+    <string name="file_button_selector">Select File</string>
+    <string name="save_Item_button">Save Item</string>
+    <string name="six_m_king_item_type">6M King</string>
+    <string name="soft_six_m_king_item_type">6M King soft</string>
+    <string name="twelve_m_king_item_type">12M King</string>
+    <string name="soft_twelve_m_king_item_type">12M King soft</string>
+    <string name="six_mhundred_item_type">6M Hundred</string>
+    <string name="soft_six_mhundred_item_type">6M Hundred soft</string>
+    <string name="twelve_m_hundred_item_type">12M Hundred</string>
+    <string name="soft_twelve_m_hundred_item_type">12M Hundred soft</string>
+    <string name="one_twenty_item_type">120</string>
+    <string name="six_point_four">6.4</string>
+    <string name="other_item_type">Other</string>
+    <string name="database_has_all_items">DB has all items</string>
+    <string name="no_quantity_string">0</string>
+    <string name="scanned_total">Scanned Total:</string>
+    <string name="proceed_to_pick">Proceed To Pick</string>
+    <string name="snackbard_undo_delete">Undo</string>
+    <string name="snack_bar_text">Undo delete if you want</string>
+    <string name="home">Home</string>
+    <string name="update_menu_option">Update</string>
+    <string name="update_items_case_type_here">Update items case type here</string>
+    <string name="edit_text_hint_string">Input item number</string>
+    <string name="update">Update</string>
+
+    <string-array name="ScanSelectionSpinnerOptions">
+        <item>RJ</item>
+        <item>ITG</item>
+        <item>PM</item>
+    </string-array>
+</resources>

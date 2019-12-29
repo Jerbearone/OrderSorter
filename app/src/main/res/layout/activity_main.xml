@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/file_selector_button_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:onClick="ItemClicked"
+        android:text="@string/file_button_selector"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ScrollView
+        android:id="@+id/scrollView2"
+        android:layout_width="match_parent"
+        android:layout_height="124dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@color/colorLight"
+        android:padding="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/quantity_text_view">
+
+        <TextView
+            android:id="@+id/results_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/default_text_view_size"
+            tools:text="heres a really long string of text to test this view...." />
+
+    </ScrollView>
+
+    <TextView
+        android:id="@+id/quantity_text_view"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@color/colorLight"
+        android:padding="@dimen/default_view_padding"
+        android:text="@string/no_quantity_string"
+        android:textSize="@dimen/default_text_view_size"
+        app:layout_constraintEnd_toEndOf="@+id/scrollView2"
+        app:layout_constraintTop_toBottomOf="@+id/file_selector_button_view"
+        tools:text="00" />
+
+    <ScrollView
+        android:id="@+id/scrollView3"
+        android:layout_width="match_parent"
+        android:layout_height="124dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@color/colorLight"
+        android:padding="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scrollView2">
+
+        <TextView
+            android:id="@+id/unparsedResultsTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/default_text_view_size"/>
+
+
+    </ScrollView>
+
+
+    <Button
+        android:id="@+id/save_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="ItemClicked"
+        android:text="@string/save_Item_button"
+        app:layout_constraintBottom_toBottomOf="@+id/scrollView4"
+        app:layout_constraintStart_toStartOf="@+id/case_update_type_selection_text_view" />
+
+    <TextView
+        android:id="@+id/item_number_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:textColor="@android:color/background_light"
+        android:textSize="@dimen/default_text_view_size"
+        app:layout_constraintStart_toEndOf="@+id/scrollView4"
+        app:layout_constraintTop_toBottomOf="@+id/scrollView3"
+        tools:text="155 2255 100" />
+
+    <TextView
+        android:id="@+id/case_update_type_selection_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:textColor="@android:color/background_light"
+        android:textSize="@dimen/default_text_view_size"
+        app:layout_constraintBottom_toTopOf="@+id/save_button"
+        app:layout_constraintStart_toStartOf="@+id/item_number_text_view"
+        app:layout_constraintTop_toBottomOf="@+id/item_number_text_view"
+        tools:text="6M King" />
+
+    <ScrollView
+        android:id="@+id/scrollView4"
+        android:layout_width="100dp"
+        android:layout_height="122dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="@+id/scrollView3"
+        app:layout_constraintTop_toBottomOf="@+id/scrollView3">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/six_m_king_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/item_type_bottom_margin"
+                android:background="@color/colorLight"
+                android:onClick="ItemClicked"
+                android:padding="@dimen/default_view_padding"
+                android:text="@string/six_m_king_item_type"
+                android:textSize="@dimen/item_type_text_size" />
+
+            <TextView
+                android:id="@+id/soft_six_m_king_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/item_type_bottom_margin"
+                android:background="@color/colorLight"
+                android:onClick="ItemClicked"
+                android:padding="@dimen/default_view_padding"
+                android:text="@string/soft_six_m_king_item_type"
+                android:textSize="@dimen/item_type_text_size" />
+
+
+            <TextView
+                android:id="@+id/twelve_m_king_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/item_type_bottom_margin"
+                android:background="@color/colorLight"
+                android:padding="@dimen/default_view_padding"
+                android:onClick="ItemClicked"
+                android:text="@string/twelve_m_king_item_type"
+                android:textSize="@dimen/item_type_text_size" />
+
+            <TextView
+                android:id="@+id/soft_twelve_m_king_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/item_type_bottom_margin"
+                android:background="@color/colorLight"
+                android:padding="@dimen/default_view_padding"
+                android:onClick="ItemClicked"
+                android:text="@string/soft_twelve_m_king_item_type"
+                android:textSize="@dimen/item_type_text_size" />
+
+            <TextView
+                android:id="@+id/twelve_m_hundred_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/item_type_bottom_margin"
+                android:background="@color/colorLight"
+                android:padding="@dimen/default_view_padding"
+                android:onClick="ItemClicked"
+                android:text="@string/twelve_m_hundred_item_type"
+                android:textSize="@dimen/item_type_text_size" />
+
+            <TextView
+                android:id="@+id/soft_twelve_m_hundred_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/item_type_bottom_margin"
+                android:background="@color/colorLight"
+                android:padding="@dimen/default_view_padding"
+                android:onClick="ItemClicked"
+                android:text="@string/soft_twelve_m_hundred_item_type"
+                android:textSize="@dimen/item_type_text_size" />
+
+            <TextView
+                android:id="@+id/six_m_hundred_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/item_type_bottom_margin"
+                android:background="@color/colorLight"
+                android:padding="@dimen/default_view_padding"
+                android:onClick="ItemClicked"
+                android:text="@string/six_mhundred_item_type"
+                android:textSize="@dimen/item_type_text_size" />
+
+            <TextView
+                android:id="@+id/soft_six_m_hundred_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/item_type_bottom_margin"
+                android:background="@color/colorLight"
+                android:padding="@dimen/default_view_padding"
+                android:onClick="ItemClicked"
+                android:text="@string/soft_six_mhundred_item_type"
+                android:textSize="@dimen/item_type_text_size" />
+
+            <TextView
+                android:id="@+id/one_twenty_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/item_type_bottom_margin"
+                android:background="@color/colorLight"
+                android:padding="@dimen/default_view_padding"
+                android:onClick="ItemClicked"
+                android:text="@string/one_twenty_item_type"
+                android:textSize="@dimen/item_type_text_size" />
+
+            <TextView
+                android:id="@+id/six_point_four_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/item_type_bottom_margin"
+                android:background="@color/colorLight"
+                android:padding="@dimen/default_view_padding"
+                android:onClick="ItemClicked"
+                android:text="@string/six_point_four"
+                android:textSize="@dimen/item_type_text_size" />
+
+            <TextView
+                android:id="@+id/other_type_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/item_type_bottom_margin"
+                android:background="@color/colorLight"
+                android:padding="@dimen/default_view_padding"
+                android:onClick="ItemClicked"
+                android:text="@string/other_item_type"
+                android:textSize="@dimen/item_type_text_size" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <TextView
+        android:id="@+id/quantity_label_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="@string/scanned_total"
+        android:textColor="@android:color/background_light"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/quantity_text_view"
+        app:layout_constraintEnd_toStartOf="@+id/quantity_text_view"
+        app:layout_constraintTop_toTopOf="@+id/quantity_text_view" />
+
+    <Button
+        android:id="@+id/next_activity_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:text="@string/proceed_to_pick"
+        android:onClick="ItemClicked"
+        app:layout_constraintStart_toEndOf="@+id/save_button"
+        app:layout_constraintTop_toTopOf="@+id/save_button" />
+
+    <Spinner
+        android:id="@+id/item_type_spinner"
+        android:layout_width="48dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="32dp"
+        app:layout_constraintBottom_toBottomOf="@+id/file_selector_button_view"
+        app:layout_constraintEnd_toStartOf="@+id/file_selector_button_view"
+        app:layout_constraintTop_toTopOf="@+id/file_selector_button_view" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
