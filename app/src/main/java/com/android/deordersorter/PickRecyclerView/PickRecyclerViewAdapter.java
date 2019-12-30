@@ -11,6 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.deordersorter.PickHandlerInterface;
 import com.android.deordersorter.R;
 import com.android.deordersorter.database.ItemEntity;
 import com.google.android.material.snackbar.Snackbar;
@@ -24,10 +25,12 @@ public class PickRecyclerViewAdapter extends RecyclerView.Adapter<PickRecyclerVi
     private ArrayList<Integer> mReversDeleteItemPositionsList = new ArrayList<>();
     private Context mContext;
     private int headerCount;
+    private PickHandlerInterface mPickHandlerInterface;
 
-    public PickRecyclerViewAdapter(ArrayList<ItemEntity> allItems,  Context context) {
+    public PickRecyclerViewAdapter(ArrayList<ItemEntity> allItems, Context context, PickHandlerInterface pickHandlerInterface) {
         mAllItems = allItems;
         mContext = context;
+        mPickHandlerInterface = pickHandlerInterface;
     }
 
     @Override
@@ -48,6 +51,10 @@ public class PickRecyclerViewAdapter extends RecyclerView.Adapter<PickRecyclerVi
         View itemRowView = layoutInflater.inflate(R.layout.single_item_row, parent, false);
         ViewHolder viewHolder = new ViewHolder(itemRowView);
         return viewHolder;
+    }
+
+    public void SendInformationToActivity() {
+        mPickHandlerInterface.passInformation(mReverseDeleteItemsList);
     }
 
     @Override
@@ -141,6 +148,7 @@ public class PickRecyclerViewAdapter extends RecyclerView.Adapter<PickRecyclerVi
             mAllItems.remove(position);
             notifyItemRemoved(position);
             showUndoSnackbar();
+            SendInformationToActivity();
 
 
     }
@@ -179,6 +187,7 @@ public class PickRecyclerViewAdapter extends RecyclerView.Adapter<PickRecyclerVi
             mReverseDeleteItemsList.remove(mReverseDeleteItemsList.size()-1);
             mReversDeleteItemPositionsList.remove(mReversDeleteItemPositionsList.size()-1);
             showUndoSnackbar();
+            SendInformationToActivity();
 
         }
 

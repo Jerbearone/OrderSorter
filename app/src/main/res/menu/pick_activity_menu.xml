@@ -4,4 +4,7 @@
 
     <item android:title="@string/home"
         android:id="@+id/go_home_option_menu"/>
+
+    <item android:title="@string/view_history"
+        android:id="@+id/menu_option_view_history"/>
 </menu>

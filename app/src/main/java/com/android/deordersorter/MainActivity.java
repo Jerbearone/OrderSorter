@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MainActivity extends AppCompatActivity  implements AdapterView.OnItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     private static final int READ_REQUEST_CODE = 42;
     private final String TAG = MainActivity.class.getSimpleName();
@@ -123,22 +123,24 @@ public class MainActivity extends AppCompatActivity  implements AdapterView.OnIt
 
 
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.update_item_menu, menu);
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_go_to_update_activity) {
-                    // Do nothing but close the dialog
-                    Intent updateItemIntent = new Intent(MainActivity.this, UpdateItemActivity.class);
-                    startActivity(updateItemIntent);
+            // Do nothing but close the dialog
+            Intent updateItemIntent = new Intent(MainActivity.this, UpdateItemActivity.class);
+            startActivity(updateItemIntent);
 
             //here is where intent was.
             return true;
-        }else {
+        } else {
             return super.onOptionsItemSelected(item);
         }
     }
@@ -154,21 +156,41 @@ public class MainActivity extends AppCompatActivity  implements AdapterView.OnIt
                 public void run() {
                     //itterate through each item that was scanned to check if in DB and add to list.
 
+                    boolean itemsNeedToBeAdded = false;
+
                     for (int x = 0; x < processedSkusList.size(); x++) {
                         final ItemEntity itemBeingChecked = new ItemEntity(processedSkusList.get(x));
                         ItemEntity theItemCheck = itemDatabase.itemDao().findItemBySku(itemBeingChecked.getItemCode());
 
                         if (theItemCheck == null) {
                             itemsToAddToDatabase.add(itemBeingChecked.getItemCode());
+                            itemsNeedToBeAdded = true;
 
-                        } else {
+                        } /*else {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     Toast.makeText(getApplicationContext(), "All items in db", Toast.LENGTH_LONG).show();
                                 }
                             });
-                        }
+                        }*/
+
+                    }
+
+                    if (itemsNeedToBeAdded) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getApplicationContext(), "Must add items before continuing", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    } else {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getApplicationContext(), "All items in DB", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
 
                     if (!itemsToAddToDatabase.isEmpty()) {
@@ -228,14 +250,14 @@ public class MainActivity extends AppCompatActivity  implements AdapterView.OnIt
 
                 if (spinnerChoice.equals("PM")) {
                     performPatterMatchPhillipMorris();
-                }else if (spinnerChoice.equals("ITG")) {
+                } else if (spinnerChoice.equals("ITG")) {
                     performPatternMatchItg();
                 } else {
                     performPatternMatch();
                 }
                 totalQuantityPatternMatch();
 
-                if  (spinnerChoice.equals("PM")) {
+                if (spinnerChoice.equals("PM")) {
                     caseQuantityPatternMatchPhillipMorris();
 
                 } else {
@@ -348,12 +370,12 @@ public class MainActivity extends AppCompatActivity  implements AdapterView.OnIt
         processedSkusList.clear();
 
         while (itemMatcher.find()) {
-            if (itemMatcher.group(2).equals("o")  || itemMatcher.group(2).equals("O")) {
-                if (itemMatcher.groupCount() == 5)  {
+            if (itemMatcher.group(2).equals("o") || itemMatcher.group(2).equals("O")) {
+                if (itemMatcher.groupCount() == 5) {
                     String singleItem = "0" + itemMatcher.group(3) + itemMatcher.group(5);
                     processedSkusList.add(singleItem);
 
-                }  else {
+                } else {
                     String singleItem = "0" + itemMatcher.group(3);
                     processedSkusList.add(singleItem);
                 }
@@ -364,7 +386,7 @@ public class MainActivity extends AppCompatActivity  implements AdapterView.OnIt
                     String singleItem = itemMatcher.group(2) + itemMatcher.group(3) + itemMatcher.group(5);
                     processedSkusList.add(singleItem);
 
-                } else{
+                } else {
                     String singleItem = itemMatcher.group(2) + itemMatcher.group(3);
                     processedSkusList.add(singleItem);
 
@@ -416,7 +438,7 @@ public class MainActivity extends AppCompatActivity  implements AdapterView.OnIt
         }
     }
 
-    public  void  caseQuantityPatternMatchPhillipMorris() {
+    public void caseQuantityPatternMatchPhillipMorris() {
         Pattern caseQuantitySearch = Pattern.compile("[1-9]{1}\\d?\\d?\\n");
         Matcher caseQuantityMatch = caseQuantitySearch.matcher(finalProcessedString);
         while (caseQuantityMatch.find()) {
@@ -429,7 +451,7 @@ public class MainActivity extends AppCompatActivity  implements AdapterView.OnIt
     public void extractQuantities() {
         if (!processedCaseQuantityList.isEmpty()) {
 
-            if  (spinnerChoice.equals("PM"))  {
+            if (spinnerChoice.equals("PM")) {
 
                 for (int x = 0; x < processedCaseQuantityList.size(); x++) {
                     String stringToConvert = processedCaseQuantityList.get(x);
@@ -439,9 +461,9 @@ public class MainActivity extends AppCompatActivity  implements AdapterView.OnIt
                     quantityItemsList.add(strippedInt);
                     Log.e(MainActivity.class.getSimpleName(), "addQuantities: " + quantityItemsList.get(x));
 
-            }
+                }
 
-            }else {
+            } else {
 
                 for (int x = 0; x < processedCaseQuantityList.size(); x++) {
                     String itemBeingStripped = processedCaseQuantityList.get(x);
@@ -498,25 +520,25 @@ public class MainActivity extends AppCompatActivity  implements AdapterView.OnIt
         if (view.getId() == R.id.six_m_king_view) {
             itemTypeSelection = getString(R.string.six_m_king_item_type);
             caseTypeSelectionView.setText(itemTypeSelection);
-        }else if (view.getId() == R.id.soft_six_m_king_view){
+        } else if (view.getId() == R.id.soft_six_m_king_view) {
             itemTypeSelection = getString(R.string.soft_six_m_king_item_type);
             caseTypeSelectionView.setText(itemTypeSelection);
-        }  else if (view.getId() == R.id.twelve_m_king_view) {
+        } else if (view.getId() == R.id.twelve_m_king_view) {
             itemTypeSelection = getString(R.string.twelve_m_king_item_type);
             caseTypeSelectionView.setText(itemTypeSelection);
         } else if (view.getId() == R.id.soft_twelve_m_king_view) {
             itemTypeSelection = getString(R.string.soft_twelve_m_king_item_type);
             caseTypeSelectionView.setText(itemTypeSelection);
-        }else if (view.getId() == R.id.six_m_hundred_view) {
+        } else if (view.getId() == R.id.six_m_hundred_view) {
             itemTypeSelection = getString(R.string.six_mhundred_item_type);
             caseTypeSelectionView.setText(itemTypeSelection);
-        }else if (view.getId() == R.id.soft_six_m_hundred_view) {
+        } else if (view.getId() == R.id.soft_six_m_hundred_view) {
             itemTypeSelection = getString(R.string.soft_six_mhundred_item_type);
             caseTypeSelectionView.setText(itemTypeSelection);
         } else if (view.getId() == R.id.twelve_m_hundred_view) {
             itemTypeSelection = getString(R.string.twelve_m_hundred_item_type);
             caseTypeSelectionView.setText(itemTypeSelection);
-        } else if (view.getId()== R.id.soft_twelve_m_hundred_view) {
+        } else if (view.getId() == R.id.soft_twelve_m_hundred_view) {
             itemTypeSelection = getString(R.string.soft_twelve_m_hundred_item_type);
             caseTypeSelectionView.setText(itemTypeSelection);
         } else if (view.getId() == R.id.one_twenty_view) {
@@ -525,7 +547,7 @@ public class MainActivity extends AppCompatActivity  implements AdapterView.OnIt
         } else if (view.getId() == R.id.six_point_four_view) {
             itemTypeSelection = getString(R.string.six_point_four);
             caseTypeSelectionView.setText(itemTypeSelection);
-        }else if (view.getId() == R.id.other_type_text_view) {
+        } else if (view.getId() == R.id.other_type_text_view) {
             itemTypeSelection = getString(R.string.other_item_type);
             caseTypeSelectionView.setText(itemTypeSelection);
 
@@ -596,7 +618,7 @@ public class MainActivity extends AppCompatActivity  implements AdapterView.OnIt
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-        spinnerChoice  = parent.getItemAtPosition(position).toString();
+        spinnerChoice = parent.getItemAtPosition(position).toString();
 
     }
 

@@ -11,10 +11,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Scroller;
+import android.widget.TextView;
 
 import com.android.deordersorter.PickRecyclerView.PickRecyclerViewAdapter;
 import com.android.deordersorter.PickRecyclerView.SwipeToDeleteCallback;
@@ -25,12 +28,13 @@ import com.android.deordersorter.utils.ItemSorterForRecyclerView;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-public class PickActivity extends AppCompatActivity {
+public class PickActivity extends AppCompatActivity implements PickHandlerInterface {
 
     ArrayList<Integer> allItemQuantities;
     ArrayList<String> allItems;
     ArrayList<ItemEntity> initialItemsToBeSorted = new ArrayList<>();
     ArrayList<ItemEntity> completelySortedArrayList = new ArrayList<>();
+    StringBuilder historyStringBuilder = new StringBuilder();
     RecyclerView itemRecyclerView;
     ItemTouchHelper itemTouchHelper;
     CoordinatorLayout recyclerCoodinatorLayout;
@@ -64,6 +68,10 @@ public class PickActivity extends AppCompatActivity {
             asyncTask.execute(null, null);
         }
 
+        //todo make app onsaveinstancestate for the arrayList when battery is low.
+        //make an option to view this saved instance state and recreate the activity that was closed.
+        // will have to override onPause to save the information everytime the app is out of view.
+
     }
 
     @Override
@@ -72,7 +80,7 @@ public class PickActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
-        PickRecyclerViewAdapter itemAdapter = new PickRecyclerViewAdapter(completelySortedArrayList, this);
+        PickRecyclerViewAdapter itemAdapter = new PickRecyclerViewAdapter(completelySortedArrayList, this, this);
         itemAdapter.setHasStableIds(true);
         itemRecyclerView.setAdapter(itemAdapter);
         layoutManager = new LinearLayoutManager(this);
@@ -84,11 +92,24 @@ public class PickActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void passInformation(ArrayList<ItemEntity> pickedList) {
+        if (pickedList != null && pickedList.size() > 0) {
+            historyStringBuilder.setLength(0);
+            //todo handle turning picked list into formatted scrollview
+
+            for (int i = 0; i < pickedList.size(); i++) {
+                historyStringBuilder.append(pickedList.get(i).getItemCode() + "   " + pickedList.get(i).getCaseQuantity() + "\n");
+
+            }
+        }
+    }
 
 
     private class sortAsyncTask extends AsyncTask<Void, Void, Void> {
 
         private WeakReference<PickActivity> weakReference;
+
         sortAsyncTask(PickActivity context) {
             weakReference = new WeakReference<>(context);
         }
@@ -177,11 +198,35 @@ public class PickActivity extends AppCompatActivity {
 
             AlertDialog alert = builder.create();
             alert.show();
-
-            //here is where intent was.
             return true;
-        }else {
+        } else if (item.getItemId() == R.id.menu_option_view_history) {
+
+            String historyParsedString = historyStringBuilder.toString();
+
+
+            AlertDialog dialog = new AlertDialog.Builder(this, R.style.CustomAlertDialogue)
+                    //todo replace title
+                    .setTitle("Pick History")
+                    .setMessage(historyParsedString)
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_info)
+                    .show();
+            TextView textView = (TextView) dialog.findViewById(android.R.id.message);
+            textView.setScroller(new Scroller(this));
+            textView.setVerticalScrollBarEnabled(true);
+            textView.setMovementMethod(new ScrollingMovementMethod());
+
+
+            return true;
+
+
+        } else {
             return super.onOptionsItemSelected(item);
+
         }
     }
 }

@@ -24,6 +24,8 @@
     <string name="update_items_case_type_here">Update items case type here</string>
     <string name="edit_text_hint_string">Input item number</string>
     <string name="update">Update</string>
+    <string name="view_history">View History</string>
+    <string name="history_dialog_box_title">Yes</string>
 
     <string-array name="ScanSelectionSpinnerOptions">
         <item>RJ</item>
