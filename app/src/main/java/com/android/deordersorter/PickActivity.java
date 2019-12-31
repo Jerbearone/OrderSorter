@@ -16,6 +16,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Scroller;
 import android.widget.TextView;
 
@@ -36,6 +38,9 @@ public class PickActivity extends AppCompatActivity implements PickHandlerInterf
     ArrayList<ItemEntity> completelySortedArrayList = new ArrayList<>();
     StringBuilder historyStringBuilder = new StringBuilder();
     RecyclerView itemRecyclerView;
+    TextView totalPalletQuantityTextView;
+    Button clearTotalButton;
+    int totalQuantityForPallet; // from recyclerViews undo method (interface)
     ItemTouchHelper itemTouchHelper;
     CoordinatorLayout recyclerCoodinatorLayout;
     LinearLayoutManager layoutManager;
@@ -51,6 +56,8 @@ public class PickActivity extends AppCompatActivity implements PickHandlerInterf
 
         itemRecyclerView = findViewById(R.id.pick_recycler_view);
         recyclerCoodinatorLayout = findViewById(R.id.recycler_coordinator_layout);
+        totalPalletQuantityTextView = findViewById(R.id.text_view_total_pallet_quantity);
+        clearTotalButton = findViewById(R.id.button_clear_total);
 
         if (listWasSorted) {
 
@@ -74,6 +81,13 @@ public class PickActivity extends AppCompatActivity implements PickHandlerInterf
 
     }
 
+    public void PickClickHandler(View view) {
+        if (view.getId() == R.id.button_clear_total) {
+            totalQuantityForPallet = 0;
+            totalPalletQuantityTextView.setText("0");
+        }
+
+    }
     @Override
     public void onBackPressed() {
         moveTaskToBack(true);
@@ -93,7 +107,7 @@ public class PickActivity extends AppCompatActivity implements PickHandlerInterf
     }
 
     @Override
-    public void passInformation(ArrayList<ItemEntity> pickedList) {
+    public void passPickList(ArrayList<ItemEntity> pickedList) {
         if (pickedList != null && pickedList.size() > 0) {
             historyStringBuilder.setLength(0);
             //todo handle turning picked list into formatted scrollview
@@ -103,6 +117,21 @@ public class PickActivity extends AppCompatActivity implements PickHandlerInterf
 
             }
         }
+    }
+
+    @Override
+    public void subtractFromTOtal(int caseQuantity) {
+        totalQuantityForPallet -= caseQuantity;
+        String palletQuantity = String.valueOf(totalQuantityForPallet);
+        totalPalletQuantityTextView.setText(palletQuantity);
+    }
+
+    @Override
+    public void addToTotal(int caseQuantity) {
+        totalQuantityForPallet += caseQuantity;
+        String palletQuantity = String.valueOf(totalQuantityForPallet);
+        totalPalletQuantityTextView.setText(palletQuantity);
+
     }
 
 

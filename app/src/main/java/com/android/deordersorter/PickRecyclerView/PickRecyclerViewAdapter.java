@@ -54,7 +54,7 @@ public class PickRecyclerViewAdapter extends RecyclerView.Adapter<PickRecyclerVi
     }
 
     public void SendInformationToActivity() {
-        mPickHandlerInterface.passInformation(mReverseDeleteItemsList);
+        mPickHandlerInterface.passPickList(mReverseDeleteItemsList);
     }
 
     @Override
@@ -93,13 +93,12 @@ public class PickRecyclerViewAdapter extends RecyclerView.Adapter<PickRecyclerVi
             holder.caseQuantity.setTextColor(Color.WHITE);
 
 
-
         } else {
             holder.itemView.setTag("Items");
             String tailcodeChecker = mAllItems.get(position).getItemCode();
             String tailcode;
             if (tailcodeChecker.length() > 3) {
-                tailcode = tailcodeChecker.substring(tailcodeChecker.length()-3);
+                tailcode = tailcodeChecker.substring(tailcodeChecker.length() - 3);
                 if (!tailcode.equals("215") && !tailcode.equals("000") && !tailcode.equals("075")) {
                     int colorId = mContext.getResources().getColor(R.color.colorGreenTailcode);
                     holder.itemView.setBackgroundColor(colorId);
@@ -118,8 +117,6 @@ public class PickRecyclerViewAdapter extends RecyclerView.Adapter<PickRecyclerVi
         }
 
 
-
-
     }
 
     @Override
@@ -132,7 +129,7 @@ public class PickRecyclerViewAdapter extends RecyclerView.Adapter<PickRecyclerVi
         public TextView itemNumber;
         public TextView simplifiedQuantityView;
 
-        public ViewHolder (View itemView) {
+        public ViewHolder(View itemView) {
             super(itemView);
             itemNumber = itemView.findViewById(R.id.list_item_sku);
             caseQuantity = itemView.findViewById(R.id.list_item_quantity);
@@ -143,27 +140,29 @@ public class PickRecyclerViewAdapter extends RecyclerView.Adapter<PickRecyclerVi
     }
 
     public void deleteItem(int position) {
-            mReverseDeleteItemsList.add(mAllItems.get(position));
-            mReversDeleteItemPositionsList.add(position);
-            mAllItems.remove(position);
-            notifyItemRemoved(position);
-            showUndoSnackbar();
-            SendInformationToActivity();
+        mReverseDeleteItemsList.add(mAllItems.get(position));
+        mReversDeleteItemPositionsList.add(position);
+        //subtract from pallet total
+        mPickHandlerInterface.addToTotal(Integer.parseInt(mAllItems.get(position).getCaseQuantity()));
+        mAllItems.remove(position);
+        notifyItemRemoved(position);
+        showUndoSnackbar();
+        SendInformationToActivity();
 
 
     }
 
     private void showUndoSnackbar() {
 
-        View view = ((Activity)mContext).findViewById(R.id.recycler_coordinator_layout);
+        View view = ((Activity) mContext).findViewById(R.id.recycler_coordinator_layout);
 
         Snackbar snackbar;
 
-        if (mAllItems.size() ==  headerCount) {
+        if (mAllItems.size() == headerCount) {
             snackbar = Snackbar.make(view, R.string.snack_bar_text,
                     Snackbar.LENGTH_INDEFINITE);
 
-        }else {
+        } else {
             snackbar = Snackbar.make(view, R.string.snack_bar_text,
                     Snackbar.LENGTH_LONG);
 
@@ -181,11 +180,14 @@ public class PickRecyclerViewAdapter extends RecyclerView.Adapter<PickRecyclerVi
     private void undoDelete() {
         //handles what happens when the undo snackbar is called.
         if (!mReversDeleteItemPositionsList.isEmpty()) {
-            mAllItems.add(mReversDeleteItemPositionsList.get(mReversDeleteItemPositionsList.size()-1),
-                    mReverseDeleteItemsList.get(mReverseDeleteItemsList.size()-1));
-            notifyItemInserted(mReversDeleteItemPositionsList.get(mReversDeleteItemPositionsList.size()-1));
-            mReverseDeleteItemsList.remove(mReverseDeleteItemsList.size()-1);
-            mReversDeleteItemPositionsList.remove(mReversDeleteItemPositionsList.size()-1);
+
+            mAllItems.add(mReversDeleteItemPositionsList.get(mReversDeleteItemPositionsList.size() - 1),
+                    mReverseDeleteItemsList.get(mReverseDeleteItemsList.size() - 1));
+            //subtract from pallet total
+            mPickHandlerInterface.subtractFromTOtal(Integer.parseInt(mReverseDeleteItemsList.get(mReversDeleteItemPositionsList.size()-1).getCaseQuantity()));
+            notifyItemInserted(mReversDeleteItemPositionsList.get(mReversDeleteItemPositionsList.size() - 1));
+            mReverseDeleteItemsList.remove(mReverseDeleteItemsList.size() - 1);
+            mReversDeleteItemPositionsList.remove(mReversDeleteItemPositionsList.size() - 1);
             showUndoSnackbar();
             SendInformationToActivity();
 

@@ -26,6 +26,8 @@
     <string name="update">Update</string>
     <string name="view_history">View History</string>
     <string name="history_dialog_box_title">Yes</string>
+    <string name="pallet_total_text">Pallet Total: </string>
+    <string name="button_clear_pallet_total">Clear</string>
 
     <string-array name="ScanSelectionSpinnerOptions">
         <item>RJ</item>
