@@ -2,11 +2,17 @@ package com.android.deordersorter;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.documentfile.provider.DocumentFile;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,8 +32,13 @@ import com.google.firebase.ml.vision.FirebaseVision;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.text.FirebaseVisionText;
 import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer;
+import com.tom_roush.pdfbox.pdmodel.PDDocument;
+import com.tom_roush.pdfbox.text.PDFTextStripper;
+import com.tom_roush.pdfbox.util.PDFBoxResourceLoader;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -81,6 +92,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private ItemDatabase itemDatabase;
 
+
+
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -120,6 +139,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         unParsedTextView = findViewById(R.id.unparsedResultsTextView);
         orderRecognizer = FirebaseVision.getInstance().getOnDeviceTextRecognizer();
         fileSelectorButton = findViewById(R.id.file_selector_button_view);
+        verifyStoragePermissions(MainActivity.this);
 
 
     }
@@ -142,6 +162,28 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             return true;
         } else {
             return super.onOptionsItemSelected(item);
+        }
+    }
+
+
+    /**
+     * Checks if the app has permission to write to device storage
+     *
+     * If the app does not has permission then the user will be prompted to grant permissions
+     *
+     * @param activity
+     */
+    public static void verifyStoragePermissions(Activity activity) {
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
         }
     }
 
@@ -252,6 +294,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     performPatterMatchPhillipMorris();
                 } else if (spinnerChoice.equals("ITG")) {
                     performPatternMatchItg();
+                } else if (spinnerChoice.equals("PDF File")) {
+                    PerformPatternMatchPDF();
+                    //todo handle all pdf files here, maybe remove other options later.
+
+
                 } else {
                     performPatternMatch();
                 }
@@ -290,8 +337,15 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 fileUri = data.getData();
 
                 //call methods to get result from image..
-                setImageFromFile();
-                processOrderImage();
+                if (!spinnerChoice.equals("PDF File")) {
+                    setImageFromFile();
+                    processOrderImage();
+                } else {
+                    //todo file URI will be a pdf file here.. parse it here.
+                    Log.e(TAG, "onActivityResult:  " + fileUri.getPath());
+
+                    PerformPatternMatchPDF();
+                }
 
 
             }
@@ -315,7 +369,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         // If one wanted to search for ogg vorbis files, the type would be "audio/ogg".
         // To search for all documents available via installed storage providers,
         // it would be "*/*".
-        intent.setType("image/*");
+
+        if (spinnerChoice.equals("PDF File")) {
+            intent.setType("*/*");
+        } else {
+            intent.setType("image/*");
+        }
 
         startActivityForResult(intent, READ_REQUEST_CODE);
 
@@ -358,6 +417,43 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         for (int x = 0; x < processedSkusList.size(); x++) {
             combinedSkuBuilder.append(processedSkusList.get(x));
             combinedSkuBuilder.append("\n");
+        }
+
+
+    }
+
+    public void PerformPatternMatchPDF() {
+        PDFBoxResourceLoader.init(getApplicationContext());
+
+        String parsedText = null;
+        PDDocument pdDocument = null;
+        File pdfFile = new File(fileUri.getPath());
+        String pdfPath = pdfFile.getAbsolutePath();
+        Log.e(TAG, "PerformPatternMatchPDF: " + pdfPath);
+        DocumentFile documentFile = DocumentFile.fromSingleUri(this, fileUri);
+        String docName = documentFile.getName();
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + docName);
+        String fileeeee = file.getAbsolutePath();
+        Log.e(TAG, "PerformPatternMatchPDF: " + docName );
+
+        try {
+            pdDocument = PDDocument.load(file);
+            Log.e(TAG, "PerformPatternMatchPDF: Path is: " + pdfPath);
+
+            try {
+                PDFTextStripper pdfTextStripper = new PDFTextStripper();
+                //pdfTextStripper.setStartPage(0);
+                parsedText = pdfTextStripper.getText(pdDocument);
+
+                //raw text from the pdf file
+                //todo this is where we can filter the information, after the pdf is parsed.
+                unParsedTextView.setText(parsedText);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "PerformPatternMatchPDF: " + "PDF file Loading didn't work" );
+            e.printStackTrace();
         }
 
 
