@@ -9,7 +9,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -38,7 +37,6 @@ import com.tom_roush.pdfbox.util.PDFBoxResourceLoader;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -91,7 +89,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     String spinnerChoice = "RJ";
 
     private ItemDatabase itemDatabase;
-
 
 
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -168,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     /**
      * Checks if the app has permission to write to device storage
-     *
+     * <p>
      * If the app does not has permission then the user will be prompted to grant permissions
      *
      * @param activity
@@ -300,13 +297,15 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
 
                 } else {
-                    performPatternMatch();
+                    PerformPatternMatchRJ();
                 }
                 totalQuantityPatternMatch();
 
                 if (spinnerChoice.equals("PM")) {
                     caseQuantityPatternMatchPhillipMorris();
 
+                } else if (spinnerChoice.equals("PDF File")) {
+                    Log.e(TAG, "onSuccess: " + processedSkusList.size() + " " + processedCaseQuantityList.size() );
                 } else {
                     caseQuantitiesPatternMatch();
                 }
@@ -343,8 +342,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 } else {
                     //todo file URI will be a pdf file here.. parse it here.
                     Log.e(TAG, "onActivityResult:  " + fileUri.getPath());
+                    //it is a pdf file, so lets handle that.
 
                     PerformPatternMatchPDF();
+                    mergeSkusAndQuantities();
+                    extractQuantities();
+                    addUpItems();
                 }
 
 
@@ -380,7 +383,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     }
 
-    public void performPatternMatch() {
+    public void PerformPatternMatchRJ() {
         //regex to handle finding case sku numbers.
         //TODO implement spinner or like view to make categories for regular expressions.
         //this pattern is for RJ specifically.
@@ -399,6 +402,29 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             combinedSkuBuilder.append("\n");
         }
 
+    }
+
+    public void performPatternMatchItgPDF() {
+
+        //todo test this method..
+
+        Pattern itemSearch = Pattern.compile("(\\d+)\\s+CS\\s+(\\d{5})");
+        Matcher itemMatcher = itemSearch.matcher(finalProcessedString);
+        StringBuilder combinedSkuBuilder = new StringBuilder();
+        processedSkusList.clear();
+
+        while (itemMatcher.find()) {
+            String singleItem = itemMatcher.group(2);
+            processedSkusList.add(singleItem);
+            String singleQuantity = itemMatcher.group(1);
+            processedCaseQuantityList.add(singleQuantity);
+        }
+
+        for (int x = 0; x < processedSkusList.size(); x++) {
+            combinedSkuBuilder.append(processedSkusList.get(x));
+            combinedSkuBuilder.append("\n");
+        }
+        Log.e(TAG, "performPatternMatchItgPDF: " + processedSkusList.get(1));
     }
 
     public void performPatternMatchItg() {
@@ -433,8 +459,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         DocumentFile documentFile = DocumentFile.fromSingleUri(this, fileUri);
         String docName = documentFile.getName();
         File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + docName);
-        String fileeeee = file.getAbsolutePath();
-        Log.e(TAG, "PerformPatternMatchPDF: " + docName );
+        Log.e(TAG, "PerformPatternMatchPDF: " + docName);
 
         try {
             pdDocument = PDDocument.load(file);
@@ -444,15 +469,17 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 PDFTextStripper pdfTextStripper = new PDFTextStripper();
                 //pdfTextStripper.setStartPage(0);
                 parsedText = pdfTextStripper.getText(pdDocument);
+                finalProcessedString = parsedText;
 
                 //raw text from the pdf file
                 //todo this is where we can filter the information, after the pdf is parsed.
                 unParsedTextView.setText(parsedText);
+                performPatternMatchItgPDF();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } catch (IOException e) {
-            Log.e(TAG, "PerformPatternMatchPDF: " + "PDF file Loading didn't work" );
+            Log.e(TAG, "PerformPatternMatchPDF: " + "PDF file Loading didn't work");
             e.printStackTrace();
         }
 
@@ -564,7 +591,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 for (int x = 0; x < processedCaseQuantityList.size(); x++) {
                     String itemBeingStripped = processedCaseQuantityList.get(x);
                     StringBuilder removeStringFromInt = new StringBuilder(itemBeingStripped);
-                    removeStringFromInt.setLength(removeStringFromInt.length() - 3);
+                    if (!spinnerChoice.equals("PDF File")) {
+                        removeStringFromInt.setLength(removeStringFromInt.length() - 3);
+                    }
                     int strippedInt = Integer.parseInt(removeStringFromInt.toString());
 
 
