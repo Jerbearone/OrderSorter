@@ -8,22 +8,30 @@
 
     <TextView
         android:id="@+id/total_pallet_text_view_label"
-        android:layout_width="120dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/default_view_padding"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:text="@string/pallet_total_text"
         android:textSize="@dimen/default_text_view_size"
-        android:text= "@string/pallet_total_text" />
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/recycler_coordinator_layout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/text_view_total_pallet_quantity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="48dp"
         android:textSize="@dimen/default_text_view_size"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/total_pallet_text_view_label"
+        app:layout_constraintEnd_toStartOf="@+id/button_clear_total"
         app:layout_constraintStart_toEndOf="@+id/total_pallet_text_view_label"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/total_pallet_text_view_label"
         tools:text="1" />
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout

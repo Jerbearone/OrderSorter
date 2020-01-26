@@ -8,6 +8,7 @@ import androidx.documentfile.provider.DocumentFile;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -31,6 +32,7 @@ import com.google.firebase.ml.vision.FirebaseVision;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.text.FirebaseVisionText;
 import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer;
+import com.google.gson.Gson;
 import com.tom_roush.pdfbox.pdmodel.PDDocument;
 import com.tom_roush.pdfbox.text.PDFTextStripper;
 import com.tom_roush.pdfbox.util.PDFBoxResourceLoader;
@@ -38,8 +40,13 @@ import com.tom_roush.pdfbox.util.PDFBoxResourceLoader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.android.deordersorter.PickActivity.PickListItemsKey;
+import static com.android.deordersorter.PickActivity.PickListQuantitiesKey;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
@@ -157,10 +164,41 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
             //here is where intent was.
             return true;
-        } else {
+        } else if (item.getItemId() == R.id.menu_continue_from_previous_pick) {
+            SharedPreferences pickListSharedPreferences = getSharedPreferences("OrderSharedPreferences", MODE_PRIVATE);
+
+            Gson pickListItemsGson = new Gson();
+            String pickListItemsJsonText = pickListSharedPreferences.getString(PickListItemsKey, null);
+            String[] pickListArray = pickListItemsGson.fromJson(pickListItemsJsonText, String[].class);
+            Gson pickListQuantitiesGson = new Gson();
+            //convert arrayList of int into arrayList of string
+            String pickListItemsQuantitiesGson = pickListSharedPreferences.getString(PickListQuantitiesKey, null);
+            String[] pickListQuantitiesArray = pickListQuantitiesGson.fromJson(pickListItemsQuantitiesGson, String[].class);
+
+            ArrayList<Integer> quantitiesArrayCoverter = new ArrayList<>();
+
+            for (int i = 0; i < pickListQuantitiesArray.length; i++) {
+                quantitiesArrayCoverter.add(Integer.parseInt(pickListQuantitiesArray[i]));
+            }
+            if (pickListQuantitiesArray.length > 0) {
+                finishedSkuList.addAll(Arrays.asList(pickListArray));
+                quantityItemsList.addAll(quantitiesArrayCoverter);
+                for (int i = 0; i < finishedSkuList.size(); i++) {
+                    Log.e(TAG, "onOptionsItemSelected: " + finishedSkuList.get(i) );
+                }
+                //start next activity
+                Intent goToPickActivity = new Intent(getApplicationContext(), PickActivity.class);
+                goToPickActivity.putExtra("continueIntentBoolean", true);
+                goToPickActivity.putStringArrayListExtra("processedSkus", finishedSkuList);
+                goToPickActivity.putIntegerArrayListExtra("itemsQuantities", quantityItemsList);
+                //TODO start activity with information
+                startActivity(goToPickActivity);
+            }
+
+            return true;
+        } else
             return super.onOptionsItemSelected(item);
         }
-    }
 
 
     /**
@@ -291,7 +329,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     performPatterMatchPhillipMorris();
                 } else if (spinnerChoice.equals("ITG")) {
                     performPatternMatchItg();
-                } else if (spinnerChoice.equals("PDF File")) {
+                } else if (spinnerChoice.equals(getString(R.string.pdf_option_title))) {
                     PerformPatternMatchPDF();
                     //todo handle all pdf files here, maybe remove other options later.
 
@@ -304,7 +342,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 if (spinnerChoice.equals("PM")) {
                     caseQuantityPatternMatchPhillipMorris();
 
-                } else if (spinnerChoice.equals("PDF File")) {
+                } else if (spinnerChoice.equals(getString(R.string.pdf_option_title))) {
                     Log.e(TAG, "onSuccess: " + processedSkusList.size() + " " + processedCaseQuantityList.size() );
                 } else {
                     caseQuantitiesPatternMatch();
@@ -336,7 +374,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 fileUri = data.getData();
 
                 //call methods to get result from image..
-                if (!spinnerChoice.equals("PDF File")) {
+                if (!spinnerChoice.equals(getString(R.string.pdf_option_title))) {
                     setImageFromFile();
                     processOrderImage();
                 } else {
@@ -373,7 +411,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         // To search for all documents available via installed storage providers,
         // it would be "*/*".
 
-        if (spinnerChoice.equals("PDF File")) {
+        if (spinnerChoice.equals(getString(R.string.pdf_option_title))) {
             intent.setType("*/*");
         } else {
             intent.setType("image/*");
@@ -591,7 +629,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 for (int x = 0; x < processedCaseQuantityList.size(); x++) {
                     String itemBeingStripped = processedCaseQuantityList.get(x);
                     StringBuilder removeStringFromInt = new StringBuilder(itemBeingStripped);
-                    if (!spinnerChoice.equals("PDF File")) {
+                    if (!spinnerChoice.equals(getString(R.string.pdf_option_title))) {
                         removeStringFromInt.setLength(removeStringFromInt.length() - 3);
                     }
                     int strippedInt = Integer.parseInt(removeStringFromInt.toString());

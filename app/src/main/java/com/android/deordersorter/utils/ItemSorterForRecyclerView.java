@@ -1,4 +1,5 @@
 package com.android.deordersorter.utils;
+import android.content.ClipData;
 import android.content.Context;
 
 import com.android.deordersorter.R;
@@ -195,6 +196,9 @@ public class ItemSorterForRecyclerView {
                 masterList.add(itemEntity);
                 masterList.addAll(otherTypeArrayList);
             }
+            ItemEntity endLabel = new ItemEntity("End");
+            endLabel.setCaseType("-5");
+            masterList.add(endLabel);
 
 
         }

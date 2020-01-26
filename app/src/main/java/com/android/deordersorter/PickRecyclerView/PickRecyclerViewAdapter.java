@@ -57,6 +57,29 @@ public class PickRecyclerViewAdapter extends RecyclerView.Adapter<PickRecyclerVi
         mPickHandlerInterface.passPickList(mReverseDeleteItemsList);
     }
 
+    public ArrayList<String> getAllItems() {
+        ArrayList<String> allItems = new ArrayList<>();
+        for (int i = 0; i < mAllItems.size(); i++) {
+            if (!mAllItems.get(i).getCaseType().equals("-5")) {
+                allItems.add(mAllItems.get(i).getItemCode());
+            }
+
+
+        }
+        return allItems;
+    }
+
+    public ArrayList<String> getAllQuantities() {
+        ArrayList<String> allQuantities = new ArrayList<>();
+        for (int i = 0; i < mAllItems.size(); i++) {
+
+            if (!mAllItems.get(i).getCaseType().equals("-5")) {
+                allQuantities.add(mAllItems.get(i).getCaseQuantity());
+            }
+        }
+        return allQuantities;
+    }
+
     @Override
     public void onBindViewHolder(@NonNull PickRecyclerViewAdapter.ViewHolder holder, int position) {
         String itemNumber = mAllItems.get(position).getItemCode();
@@ -96,8 +119,8 @@ public class PickRecyclerViewAdapter extends RecyclerView.Adapter<PickRecyclerVi
         } else {
             holder.itemView.setTag("Items");
             String tailcodeChecker = mAllItems.get(position).getItemCode();
-            String tailcode;
-            if (tailcodeChecker.length() > 3) {
+            if (tailcodeChecker.length() > 5) {
+                String tailcode;
                 tailcode = tailcodeChecker.substring(tailcodeChecker.length() - 3);
                 if (!tailcode.equals("215") && !tailcode.equals("000") && !tailcode.equals("075")) {
                     int colorId = mContext.getResources().getColor(R.color.colorGreenTailcode);
@@ -113,6 +136,9 @@ public class PickRecyclerViewAdapter extends RecyclerView.Adapter<PickRecyclerVi
                 }
 
 
+            }else {
+                holder.itemView.setBackgroundColor(mContext.getResources().getColor(R.color.colorLight));
+                caseQuantityTextView.setText(String.valueOf(caseQuantity));
             }
         }
 
@@ -174,6 +200,12 @@ public class PickRecyclerViewAdapter extends RecyclerView.Adapter<PickRecyclerVi
                 undoDelete();
             }
         });
+
+        //this is to change the snackbars message color.
+        View snackBarView = snackbar.getView();
+        TextView snackBarText = (TextView) snackBarView.findViewById(com.google.android.material.R.id.snackbar_text);
+        snackBarText.setTextColor(mContext.getResources().getColor(R.color.colorLight));
+        //show the snackbar..
         snackbar.show();
     }
 
@@ -184,7 +216,7 @@ public class PickRecyclerViewAdapter extends RecyclerView.Adapter<PickRecyclerVi
             mAllItems.add(mReversDeleteItemPositionsList.get(mReversDeleteItemPositionsList.size() - 1),
                     mReverseDeleteItemsList.get(mReverseDeleteItemsList.size() - 1));
             //subtract from pallet total
-            mPickHandlerInterface.subtractFromTOtal(Integer.parseInt(mReverseDeleteItemsList.get(mReversDeleteItemPositionsList.size()-1).getCaseQuantity()));
+            mPickHandlerInterface.subtractFromTOtal(Integer.parseInt(mReverseDeleteItemsList.get(mReversDeleteItemPositionsList.size() - 1).getCaseQuantity()));
             notifyItemInserted(mReversDeleteItemPositionsList.get(mReversDeleteItemPositionsList.size() - 1));
             mReverseDeleteItemsList.remove(mReverseDeleteItemsList.size() - 1);
             mReversDeleteItemPositionsList.remove(mReversDeleteItemPositionsList.size() - 1);

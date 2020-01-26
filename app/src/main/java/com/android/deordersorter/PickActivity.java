@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
@@ -26,9 +27,13 @@ import com.android.deordersorter.PickRecyclerView.SwipeToDeleteCallback;
 import com.android.deordersorter.database.ItemDatabase;
 import com.android.deordersorter.database.ItemEntity;
 import com.android.deordersorter.utils.ItemSorterForRecyclerView;
+import com.google.gson.Gson;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class PickActivity extends AppCompatActivity implements PickHandlerInterface {
 
@@ -43,10 +48,17 @@ public class PickActivity extends AppCompatActivity implements PickHandlerInterf
     int totalQuantityForPallet; // from recyclerViews undo method (interface)
     ItemTouchHelper itemTouchHelper;
     CoordinatorLayout recyclerCoodinatorLayout;
+    PickRecyclerViewAdapter itemAdapter;
     LinearLayoutManager layoutManager;
     private ItemDatabase itemDatabase;
     boolean listWasSorted = false;
-    private String Tag = PickActivity.class.getSimpleName();
+    private String TAG = PickActivity.class.getSimpleName();
+    private boolean onPauseWasCalled = false;
+    SharedPreferences pickListSharedPreferences;
+    public static final String PickListItemsKey = "PICK_LIST_SAVED_DATA";
+    public static final String PickListQuantitiesKey = "PICK_LIST_SAVED_QUANTITIES";
+    public static final String PickListHistoryKey = "PICK_LIST_HISTORY";
+    Intent infoIntent;
 
 
     @Override
@@ -66,20 +78,25 @@ public class PickActivity extends AppCompatActivity implements PickHandlerInterf
             itemDatabase = ItemDatabase.getInstance(getApplicationContext());
             //setup recyclerView
             //setup items for arrayAdapter
-            Intent infoIntent = getIntent();
+            infoIntent = getIntent();
             allItemQuantities = infoIntent.getIntegerArrayListExtra("itemsQuantities");
-            allItems = infoIntent.getStringArrayListExtra("processedSkus");
 
-            //turn arrays into ItemEntity
-            sortAsyncTask asyncTask = new sortAsyncTask(this);
-            asyncTask.execute(null, null);
+        }
+        allItems = infoIntent.getStringArrayListExtra("processedSkus");
+
+        for (int i = 0; i < allItemQuantities.size(); i++) {
+            Log.e(TAG, "onCreate: " + allItemQuantities.get(i));
         }
 
-        //todo make app onsaveinstancestate for the arrayList when battery is low.
-        //make an option to view this saved instance state and recreate the activity that was closed.
-        // will have to override onPause to save the information everytime the app is out of view.
-
+        //turn arrays into ItemEntity
+        sortAsyncTask asyncTask = new sortAsyncTask(this);
+        asyncTask.execute(null, null);
     }
+
+    //todo make app onsaveinstancestate for the arrayList when battery is low.
+    //make an option to view this saved instance state and recreate the activity that was closed.
+    // will have to override onPause to save the information everytime the app is out of view.
+
 
     public void PickClickHandler(View view) {
         if (view.getId() == R.id.button_clear_total) {
@@ -88,13 +105,65 @@ public class PickActivity extends AppCompatActivity implements PickHandlerInterf
         }
 
     }
+
     @Override
     public void onBackPressed() {
         moveTaskToBack(true);
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        onPauseWasCalled = true;
+        Log.e(TAG, "onPause:  was called" );
+        pickListSharedPreferences = getApplicationContext().getSharedPreferences("OrderSharedPreferences", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pickListSharedPreferences.edit();
+        //add all items..
+        editor.putString(PickListHistoryKey, historyStringBuilder.toString());
+        Gson picklistGson = new Gson();
+        ArrayList<String> allCurrentItems = itemAdapter.getAllItems();
+        String pickListText = picklistGson.toJson(allCurrentItems);
+        editor.putString(PickListItemsKey, pickListText);
+        //add all quantities
+        Gson pickListQuantitiesGson = new Gson();
+        ArrayList<String> allCurrentQuantities = itemAdapter.getAllQuantities();
+        String pickListQuantitiesText = pickListQuantitiesGson.toJson(allCurrentQuantities);
+        editor.putString(PickListQuantitiesKey, pickListQuantitiesText);
+        editor.apply();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e(TAG, "onResume: was called");
+        //if the continue toolbar options was pressed, or onPause was called, reload the data.
+        if (infoIntent.getBooleanExtra("continueIntentBoolean", false) || onPauseWasCalled) {
+            pickListSharedPreferences = getApplicationContext().getSharedPreferences("OrderSharedPreferences", MODE_PRIVATE);
+            Gson pickListItemsGson = new Gson();
+            String pickListItemsJsonText = pickListSharedPreferences.getString(PickListItemsKey, null);
+            String[] pickListArray = pickListItemsGson.fromJson(pickListItemsJsonText, String[].class);
+            Gson pickListQuantitiesGson = new Gson();
+            //convert arrayList of int into arrayList of string
+            String pickListItemsQuantitiesGson = pickListSharedPreferences.getString(PickListQuantitiesKey, null);
+            String[] pickListQuantitiesArray = pickListQuantitiesGson.fromJson(pickListItemsQuantitiesGson, String[].class);
+            allItems.clear();
+            allItems.addAll(Arrays.asList(pickListArray));
+            allItemQuantities.clear();
+            ArrayList<Integer> quantitiesArrayCoverter = new ArrayList<>();
+
+            for (int i = 0; i < pickListQuantitiesArray.length; i++) {
+                quantitiesArrayCoverter.add(Integer.parseInt(pickListQuantitiesArray[i]));
+            }
+            allItemQuantities.addAll(quantitiesArrayCoverter);
+            String historyResumed = pickListSharedPreferences.getString(PickListHistoryKey, null);
+            historyStringBuilder.setLength(0);
+            historyStringBuilder.append(historyResumed);
+        }
+    }
+
     private void setupRecyclerView() {
-        PickRecyclerViewAdapter itemAdapter = new PickRecyclerViewAdapter(completelySortedArrayList, this, this);
+        itemAdapter = new PickRecyclerViewAdapter(completelySortedArrayList, this, this);
         itemAdapter.setHasStableIds(true);
         itemRecyclerView.setAdapter(itemAdapter);
         layoutManager = new LinearLayoutManager(this);
@@ -109,13 +178,16 @@ public class PickActivity extends AppCompatActivity implements PickHandlerInterf
     @Override
     public void passPickList(ArrayList<ItemEntity> pickedList) {
         if (pickedList != null && pickedList.size() > 0) {
-            historyStringBuilder.setLength(0);
+            //historyStringBuilder.setLength(0);
             //todo handle turning picked list into formatted scrollview
+            int pickListLastIndex = pickedList.size()-1;
+            historyStringBuilder.append(pickedList.get(pickListLastIndex).getItemCode() + "   " +
+                    pickedList.get(pickListLastIndex).getCaseQuantity() + "\n");
 
-            for (int i = 0; i < pickedList.size(); i++) {
+            /*for (int i = 0; i < pickedList.size(); i++) {
                 historyStringBuilder.append(pickedList.get(i).getItemCode() + "   " + pickedList.get(i).getCaseQuantity() + "\n");
 
-            }
+            } */
         }
     }
 
@@ -153,7 +225,7 @@ public class PickActivity extends AppCompatActivity implements PickHandlerInterf
                 theItemCheck.setCaseQuantity(Integer.toString(allItemQuantities.get(x)));
 
                 if (theItemCheck.getCaseType() == null) {
-                    Log.e(Tag, "for some reason item check is null. ");
+                    Log.e(TAG, "for some reason item check is null. ");
 
                 } else {
                     initialItemsToBeSorted.add(theItemCheck);

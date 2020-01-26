@@ -24,10 +24,14 @@
     <string name="update_items_case_type_here">Update items case type here</string>
     <string name="edit_text_hint_string">Input item number</string>
     <string name="update">Update</string>
+    <string name="continue_from_previous_pick">Continue</string>
     <string name="view_history">View History</string>
     <string name="history_dialog_box_title">Yes</string>
     <string name="pallet_total_text">Pallet Total: </string>
     <string name="button_clear_pallet_total">Clear</string>
+
+    <!-- pdf strings -->
+    <string name="pdf_option_title">PDF File</string>
 
     <string-array name="ScanSelectionSpinnerOptions">
         <item>RJ</item>
